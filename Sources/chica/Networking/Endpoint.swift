@@ -1,0 +1,139 @@
+//
+//  Endpoint.swift
+//  Chica
+//
+//  Created by Alex Modroño Vara on 16/7/21.
+//
+
+import Foundation
+
+/// Reusable base Endpoint struct that allows us to have all the possible API paths in a cleaner way.
+/// It is used everytime we try to interact with the fediverse.
+///
+/// To acess the entire path, access the variable `Endpoint.path`.
+///
+/// Special thanks to **Thomas Ricouard** for inspiration.
+public enum Endpoint {
+
+    //  MARK: - OAUTH
+    /* Everything related with registering client applications that can be used to obtain OAuth tokens and authorizing user
+     * accounts for interacting with user-level data. */
+    
+    /// Create a new application to obtain OAuth2 credentials.
+    case apps
+
+    /// Confirm that the app's OAuth2 credentials work.
+    case verifyAppCredentials
+
+    /// Displays an authorization form to the user. If approved, it will create and return an authorization code, then redirect to the desired redirect_uri, or show the authorization code if urn:ietf:wg:oauth:2.0:oob was requested. The authorization code can be used while requesting a token to obtain access to user-level methods.
+    case authorizeUser
+
+    /// Obtain or revoke an access token, to be used during API calls that are not public.
+    case token, revokeToken
+
+    //  MARK: - ACCOUNTS
+    // Methods concerning user accounts and related information.
+   
+    //  MARK: – CREDENTIALS
+    // Methods concerning working with an account's credentials
+
+    /// Creates a user and account records. Returns an account access token for the app that initiated the request. The app should save this token for later, and should wait for the user to confirm their account by clicking a link in their email inbox.
+    case registerAccount
+
+    /// Test the token of an account works.
+    case verifyAccountCredentials
+
+    /// Update the credentials of an account.
+    case updateCredentials
+
+    //  MARK: – INFORMATION
+    /// Methods concerning retrieving an account's related information.
+    
+    /// View information about a profile.
+    case account(id: String)
+
+    /// Retrieve the statuses posted to the given account.
+    case accountStatuses(id: String)
+
+    /// Accounts which follow the given account, if network is not hidden by the account owner.
+    case accountFollowers(id: String)
+
+    /// Accounts which the given account is following, if network is not hidden by the account owner.
+    case accountFollowing(id: String)
+
+    /// Tags featured by this account.
+    case accountFeaturedTags(id: String)
+
+    /// User lists that you have added this account to.
+    case accountLists(id: String)
+
+    /// Returns an array of IdentityProof
+    case accountIdentityProofs(id: String)
+
+   
+    //  MARK: – ACTIONS
+    // Methods concerning performing actions on accounts.
+
+    /// Follow or unfollow the given account. Can also be used to update whether to show reblogs or enable notifications.
+    case followAccount(id: String), unfollowAccount(id: String)
+
+    /// Block or unblock the given account.
+    ///
+    /// Clients should filter statuses from this account if received (e.g. due to a boost in the Home timeline).
+    case blockAccount(id: String), unblockAccount(id: String)
+
+    /// Mute or unmute the given account.
+    ///
+    /// Clients should filter statuses and notifications from this account, if received (e.g. due to a boost in the Home timeline).
+    case muteAccount(id: String), unmuteAccount(id: String)
+
+    /// Add or remove the given account to the user's featured profiles.
+    ///
+    /// Featured profiles are currently shown on the user's own public profile.
+    case pinAccount(id: String), unpinAccount(id: String)
+
+    /// Sets a private note on a user.
+    case noteOnAccount(id: String)
+
+    //  MARK: – GENERAL
+    // Methods concerning performing general actions or retrieving general information from accounts.
+
+    /// Find out whether a given account is followed, blocked, muted, etc.
+    case generalRelationships
+
+    /// Search for matching accounts by username or display name.
+    case search
+
+    /// Full path
+    var path: String {
+
+        switch self {
+
+        // Accounts
+        case .apps:
+            return "/api/v1/apps"
+        case .verifyAppCredentials:
+            return "/api/v1/apps/verify_credentials"
+        case .authorizeUser:
+            return "/oauth/authorize"
+        case .token:
+            return "/oauth/token"
+        case .revokeToken:
+            return "/oauth/revoke"
+        case .registerAccount:
+            return "/api/v1/accounts"
+        case .verifyAccountCredentials:
+            return "/api/v1/accounts/verify_credentials"
+        case .updateCredentials:
+            return "/api/v1/accounts/update_credentials"
+        case let .account(id):
+            return "/api/v1/accounts/\(id)"
+        case let .accountStatuses(id):
+            return "/api/v1/accounts/\(id)/statuses"
+        case let .accountFollowers(id):
+            return "/api/v1/accounts/\(id)/statuses"
+        default: return ""
+        }
+    }
+
+}
