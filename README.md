@@ -1,6 +1,6 @@
 <div align="center">
 
-![Banner](/Users/alex/Documents/github/Xcode/chica/Resources/banner.png)
+![Banner](./Resources/banner.png)
 
 ![swift 5.5](https://img.shields.io/badge/swift-5.5-blue.svg)
 ![SwiftUI](https://img.shields.io/badge/-SwiftUI-blue.svg)
