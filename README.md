@@ -10,12 +10,14 @@
 ![tvOS](https://img.shields.io/badge/os-tvOS-green.svg)
 ![watchOS](https://img.shields.io/badge/os-watchOS-green.svg)
 
+<img src="./Resources/go-to-starlight.png" width="140" height="35"/> <img src="./Resources/discord.png" width="175" height="35"/>  
+    
 </div>
 
 # Index
 
 <!-- Pages -->
-[qs]: #quick-start-
+[qsp]: #quick-start-
 [bfs]: #building-from-source
 [spm]: #through-swift-package-manager
 [wcidwi]: #what-can-i-do-with-it
@@ -23,7 +25,7 @@
 [cntrbtn]: #contributions
 
 <!-- Links -->
-- [Quick Start][qs]
+- [Quick Start 🏃‍♂️][qsp]
     - [Building from source][bfs]
     - [Through Swift Package Manager][spm]
 - [What can I do with it?][wcidwi]
