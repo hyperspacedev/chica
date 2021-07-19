@@ -17,7 +17,7 @@
 # Index
 
 <!-- Pages -->
-[qsp]: #quick-start-
+[qsp]: #quick-start-%EF%B8%8F
 [bfs]: #building-from-source
 [spm]: #through-swift-package-manager
 [wcidwi]: #what-can-i-do-with-it
