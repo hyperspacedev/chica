@@ -10,7 +10,7 @@
 ![tvOS](https://img.shields.io/badge/os-tvOS-green.svg)
 ![watchOS](https://img.shields.io/badge/os-watchOS-green.svg)
 
-<img src="./Resources/go-to-starlight.png" width="145" height="35"/> <img src="./Resources/discord.png" width="175" height="35"/>  
+<a href="https://https://github.com/hyperspacedev/starlight"><img src="./Resources/go-to-starlight.png" width="143" height="35"/></a> <a href="https://discord.gg/c69AXwk"><img src="./Resources/discord.png" width="177" height="35"/> </a>
     
 </div>
 
