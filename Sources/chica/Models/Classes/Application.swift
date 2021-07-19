@@ -23,6 +23,12 @@ public class Application: Codable, Identifiable {
     /// The name of the application.
     public let name: String
 
+    /// Client ID key, to be used for obtaining OAuth tokens
+    public let clientId: String?
+
+    /// Client secret key, to be used for obtaining OAuth tokens
+    public let clientSecret: String?
+
     /// The application's website, if applicable.
     public let website: String?
 
@@ -33,6 +39,8 @@ public class Application: Codable, Identifiable {
 
     private enum CodingKeys: String, CodingKey {
         case name
+        case clientId = "client_id"
+        case clientSecret = "client_secret"
         case website
         case vapidKey = "vapid_key"
     }

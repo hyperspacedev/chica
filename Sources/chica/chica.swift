@@ -1,6 +1,7 @@
 import Foundation
 import KeychainAccess
 import SwiftUI
+import Combine
 
 /**
 The primary client object that handles all fediverse requests. It basically works as the logic controller of all the networking done by the app.
@@ -29,32 +30,46 @@ public class Chica: ObservableObject, CustomStringConvertible {
         }
 
         static public let shared = OAuth()
+
+        /// An EnvironmentValue that allows us to open a URL using the appropriate system service.
+        ///
+        /// Can be used as follows:
+        /// ```
+        /// openURL(URL(string: "url")!)
+        /// ```
+        /// or
+        ///```
+        /// openURL(url) // Where URL.type == URL
+        /// ```
+        @Environment(\.openURL) private var openURL
         
         /// The current state of the authorization (i.e. whether the user is signedOut, signing in, or already logged in).
         @Published public var authState = State.refreshing
 
-        // Oauth URL
-        private let baseURL = "\(Chica.API_URL)/authorize"
-        private let secrets: [String: AnyObject]?
+        //  MARK: – STORED PROPERTIES
 
         // Intializing Keychain
-        private let keychainService = "net.marquiskurt.starlight–secrets"
+        static public let keychainService = "net.marquiskurt.starlight–secrets"
+
+        private let scopes = ["read", "write", "follow", "push"]
+
+        private let URL_SUFFIX = "oauth"
 
         init() {
 
             _ = isOnMainThread(named: "OAUTH CLIENT STARTED")
 
-            //  First, we are trying to see if there is a Tokens.plist file that we will use for our application.
-            if let path = Bundle.path(forResource: "Tokens", ofType: "plist", inDirectory: "Tokens"),
-               let secrets = NSDictionary(contentsOfFile: path) as? [String: AnyObject] {
-                self.secrets = secrets
-            } else {
-                self.secrets = nil
-                print("Error: We couldn't locate your \"Tokens.plist\" file which means that you won't be able to use Starlight.")
-            }
+//            //  First, we are trying to see if there is a Tokens.plist file that we will use for our application.
+//            if let path = Bundle.path(forResource: "Tokens", ofType: "plist", inDirectory: "Tokens"),
+//               let secrets = NSDictionary(contentsOfFile: path) as? [String: AnyObject] {
+//                self.secrets = secrets
+//            } else {
+//                self.secrets = nil
+//                print("Error: We no secrets were found which means that you won't be able to use Starlight.")
+//            }
 
             //  Now, we check whether the user is signed in or not.
-            let keychain = Keychain(service: keychainService)
+            let keychain = Keychain(service: Chica.OAuth.keychainService)
             if let accessToken = keychain["starlight_acess_token"] {
                 authState = .authenthicated(authToken: accessToken)
             } else {
@@ -64,18 +79,68 @@ public class Chica: ObservableObject, CustomStringConvertible {
         }
 
         /// Returns the URL that needs to be opened in the browser to allow the user to complete registration.
-        public func startOauthFlow() -> URL? {
-            guard let clientId = secrets?["client_id"] as? String else {
-                return nil
-            }
-            
+        public func startOauthFlow(for instanceDomain: String) async {
+
+            //  First, we initialize the keychain object
+            let keychain = Keychain(service: Chica.OAuth.keychainService)
+
+            //  Then, we assign the domain of the instance we are working with.
+            keychain["starlight_instance_domain"] = instanceDomain
+
+            //  Now, we change the state of the oauth to .signInProgress
             authState = .signinInProgress
 
-            return URL(string: baseURL)!
-                .queryItem("client_id", value: clientId)
-                .queryItem("redirect_uris", value: "starlight://auth")
-                .queryItem("scopes", value: "starlight://auth")
+            //  We then do a POST request to create an application on the specified mastodon instance.
+            let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
+                [
+                    "client_name": "Starlight",
+                    "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
+                    "scopes": scopes.joined(separator: " "),
+                    "website": "https://hyperspace.marquiskurt.net"
+                ]
+            )
+
+            //  Once we register our application, we store the information we need for later (id and secret).
+            keychain["starlight_client_id"] = client?.clientId
+            keychain["starlight_client_secret"] = client?.clientSecret
+
+            //  Then, we generate the url we need to visit for authorizing the user
+            let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
+                .queryItem("client_id", value: client?.clientId)
+                .queryItem("redirect_uris", value: "\(URL_PREFIX)\(URL_SUFFIX)")
+                .queryItem("scopes", value: scopes.joined(separator: " "))
                 .queryItem("website", value: "https://hyperspace.marquiskurt.net")
+
+            //  And finally, we open the url in the browser.
+            openURL(url)
+        }
+
+        public func continueOauthFlow(_ url: URL) async {
+
+            if let code = url.queryParameters?.first(where: { $0.key == "code" }) {
+
+                let keychain = Keychain(service: Chica.OAuth.keychainService)
+
+                //  We now have the user code, so now all we need to do is retrieve our token
+                let token: Token? = try! await Chica.shared.request(.post, for: .token, params:
+                    [
+                        "client_id": keychain["starlight_client_id"]!,
+                        "client_secret": keychain["starlight_client_secret"]!,
+                        "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
+                        "grant_type": "authorization_code",
+                        "code": code.value,
+                        "scope": scopes.joined(separator: " ")
+                    ]
+                )
+
+                //  We store the token in the keychain
+                keychain["starlight_acess_token"] = token?.accessToken
+
+                //  And, finally, we change the state to use the token we just retrieved.
+                self.authState = .authenthicated(authToken: token!.accessToken)
+
+            }
+
         }
 
     }
@@ -94,31 +159,24 @@ public class Chica: ObservableObject, CustomStringConvertible {
     //  MARK: – URLs
 
     /// The url prefix
-    static private let URL_PREFIX = "https://"
+    static private let URL_PREFIX = "starlight://"
 
     /// The domain (without the prefixes) of the instance.
-    static public private(set) var INSTANCE_DOMAIN = "mastodon.social"
+    static let INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.social"
 
-    static private let API_URL = URL(string: "\(URL_PREFIX)\(INSTANCE_DOMAIN)")!
-
-    /// An EnvironmentValue that allows us to open a URL using the appropriate system service.
-    ///
-    /// Can be used as follows:
-    /// ```
-    /// openURL(URL(string: "url")!)
-    /// ```
-    /// or
-    ///```
-    /// openURL(url) // Where URL.type == URL
-    /// ```
-    @Environment(\.openURL) private var openURL
+    static public let API_URL = URL(string: "https://\(INSTANCE_DOMAIN)")!
 
     /// Allows us to decode top-level values of the given type from the given JSON representation.
     private let decoder: JSONDecoder
 
     private var session: URLSession
 
-    public private(set) var text = "Hello, World!"
+    /// Whether this is a debug build of Chica.
+    ///
+    /// This is just required for xcode tests. If you are just building chica from source, or are not sure of what you're doing, then leave it as is.
+    static public var debug: Bool = false
+
+    private var oauthStateCancellable: AnyCancellable?
 
     //  MARK: - INITIALIZERS
 
@@ -130,15 +188,19 @@ public class Chica: ObservableObject, CustomStringConvertible {
         decoder.dateDecodingStrategy = .secondsSince1970
 
         self.decoder = decoder
+        var token: String? = nil
 
-        let token: String? = nil
+        //  For the moment, we still need to use Combine and Publishers a bit, but this might change over time.
+        oauthStateCancellable = OAuth.shared.$authState.sink { state in
 
-//        switch state {
-//        case .authenthicated(let token):
-//            self.authenticatedSession = URLSession(configuration: Self.makeSessionConfiguration(token: token))
-//        case .refreshing, .signinInProgress, .signedOut:
-//            self.authenticatedSession = nil
-//        }
+            switch state {
+            case .authenthicated(let oToken):
+                token = oToken
+            default:
+                break
+            }
+
+        }
 
         let configuration = URLSessionConfiguration.default
         var headers = ["User-Agent": "Starlight:v1.0 (by Starlight Development Team)."]
@@ -153,6 +215,16 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
         self.session = URLSession(configuration: configuration)
 
+    }
+
+    public static func handleURL(url: URL) {
+        if url.absoluteString.hasPrefix(self.URL_PREFIX) {
+            if url.absoluteString.contains("oauth") {
+                async {
+                    await OAuth.shared.continueOauthFlow(url)
+                }
+            }
+        }
     }
 
     /// Returns a URLRequest with the specified URL, http method, and query parameters.
