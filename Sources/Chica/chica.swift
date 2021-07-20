@@ -110,7 +110,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
                 .queryItem("client_id", value: client?.clientId)
                 .queryItem("redirect_uri", value: "\(URL_PREFIX)\(URL_SUFFIX)")
                 .queryItem("scopes", value: scopes.joined(separator: " "))
-                .queryItem("website", value: "https://hyperspace.marquiskurt.net")
+                .queryItem("response_type", value: "code")
 
             //  And finally, we open the url in the browser.
             openURL(url)
