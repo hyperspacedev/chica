@@ -95,7 +95,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
                 [
                     "client_name": "Starlight",
-                    "redirect_uri": "\(Chica.URL_PREFIX)\(URL_SUFFIX)",
+                    "redirect_uris": "\(Chica.URL_PREFIX)\(URL_SUFFIX)",
                     "scopes": scopes.joined(separator: " "),
                     "website": "https://hyperspace.marquiskurt.net"
                 ]
@@ -247,7 +247,8 @@ public class Chica: ObservableObject, CustomStringConvertible {
         var content: T? = nil
 
         let url = Self.API_URL.appendingPathComponent(endpoint.path)
-        let (data, response) = try await self.session.data(for: Self.makeRequest(method, url: url, params: params))
+        let (data, response) = try! await self.session.data(for: Self.makeRequest(method, url: url, params: params))
+
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
             throw FetchError.message(
                 reason: "Request returned with error code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))",

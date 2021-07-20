@@ -16,6 +16,12 @@ final class chicaTests: XCTestCase {
     /// ```
     @Environment(\.openURL) private var openURL
 
+    func testOauth() async throws {
+
+        await Chica.OAuth.shared.startOauthFlow(for: "mastodon.social")
+
+    }
+
     func testBasicRequests() async throws {
 
         let account = try! await getAccount(id: "1")
