@@ -171,11 +171,6 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     private var session: URLSession
 
-    /// Whether this is a debug build of Chica.
-    ///
-    /// This is just required for xcode tests. If you are just building chica from source, or are not sure of what you're doing, then leave it as is.
-    static public var debug: Bool = false
-
     private var oauthStateCancellable: AnyCancellable?
 
     //  MARK: - INITIALIZERS

@@ -1,5 +1,5 @@
 import XCTest
-@testable import chica
+@testable import Chica
 import SwiftUI
 
 final class chicaTests: XCTestCase {

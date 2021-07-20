@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "chica",
+        "repositoryURL": "/Users/alex/Documents/github/Xcode/chica/",
+        "state": {
+          "branch": "main",
+          "revision": "84bff2e05bb7883198781c027fa70a0c0760e119",
+          "version": null
+        }
+      },
+      {
+        "package": "KeychainAccess",
+        "repositoryURL": "https://github.com/kishikawakatsumi/KeychainAccess",
+        "state": {
+          "branch": null,
+          "revision": "84e546727d66f1adc5439debad16270d0fdd04e7",
+          "version": "4.2.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
