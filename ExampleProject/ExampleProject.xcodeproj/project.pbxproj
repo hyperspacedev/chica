@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FA575C2926A6BE4700A8D67B /* chica in Frameworks */ = {isa = PBXBuildFile; productRef = FA575C2826A6BE4700A8D67B /* chica */; };
+		FA56042526A759F9007F5160 /* Chica in Frameworks */ = {isa = PBXBuildFile; productRef = FA56042426A759F9007F5160 /* Chica */; };
 		FA6CAED726A6BB9C00E1FA29 /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAEC926A6BB9B00E1FA29 /* ExampleProjectApp.swift */; };
 		FA6CAED826A6BB9C00E1FA29 /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAEC926A6BB9B00E1FA29 /* ExampleProjectApp.swift */; };
 		FA6CAED926A6BB9C00E1FA29 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAECA26A6BB9B00E1FA29 /* ContentView.swift */; };
@@ -17,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FA56041F26A6C2AF007F5160 /* ExampleProject--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "ExampleProject--iOS--Info.plist"; sourceTree = "<group>"; };
 		FA6CAEC926A6BB9B00E1FA29 /* ExampleProjectApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleProjectApp.swift; sourceTree = "<group>"; };
 		FA6CAECA26A6BB9B00E1FA29 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FA6CAECB26A6BB9C00E1FA29 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -29,7 +30,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA575C2926A6BE4700A8D67B /* chica in Frameworks */,
+				FA56042526A759F9007F5160 /* Chica in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +47,7 @@
 		FA6CAEC326A6BB9B00E1FA29 = {
 			isa = PBXGroup;
 			children = (
+				FA56041F26A6C2AF007F5160 /* ExampleProject--iOS--Info.plist */,
 				FA6CAEC826A6BB9B00E1FA29 /* Shared */,
 				FA6CAED126A6BB9C00E1FA29 /* Products */,
 			);
@@ -87,7 +89,7 @@
 			);
 			name = "ExampleProject (iOS)";
 			packageProductDependencies = (
-				FA575C2826A6BE4700A8D67B /* chica */,
+				FA56042426A759F9007F5160 /* Chica */,
 			);
 			productName = "ExampleProject (iOS)";
 			productReference = FA6CAED026A6BB9C00E1FA29 /* ExampleProject.app */;
@@ -138,7 +140,7 @@
 			);
 			mainGroup = FA6CAEC326A6BB9B00E1FA29;
 			packageReferences = (
-				FA575C2726A6BE4700A8D67B /* XCRemoteSwiftPackageReference "chica" */,
+				FA56042326A759F9007F5160 /* XCRemoteSwiftPackageReference "chica" */,
 			);
 			productRefGroup = FA6CAED126A6BB9C00E1FA29 /* Products */;
 			projectDirPath = "";
@@ -312,12 +314,13 @@
 				DEVELOPMENT_TEAM = Z2RTAGA7V9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ExampleProject--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -342,12 +345,13 @@
 				DEVELOPMENT_TEAM = Z2RTAGA7V9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ExampleProject--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -382,7 +386,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.amodrono.ExampleProject;
 				PRODUCT_NAME = ExampleProject;
@@ -411,7 +415,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.amodrono.ExampleProject;
 				PRODUCT_NAME = ExampleProject;
@@ -454,7 +458,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		FA575C2726A6BE4700A8D67B /* XCRemoteSwiftPackageReference "chica" */ = {
+		FA56042326A759F9007F5160 /* XCRemoteSwiftPackageReference "chica" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "file:///Users/alex/Documents/github/Xcode/chica/";
 			requirement = {
@@ -465,10 +469,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		FA575C2826A6BE4700A8D67B /* chica */ = {
+		FA56042426A759F9007F5160 /* Chica */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FA575C2726A6BE4700A8D67B /* XCRemoteSwiftPackageReference "chica" */;
-			productName = chica;
+			package = FA56042326A759F9007F5160 /* XCRemoteSwiftPackageReference "chica" */;
+			productName = Chica;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

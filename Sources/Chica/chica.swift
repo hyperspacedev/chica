@@ -86,6 +86,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
             //  Then, we assign the domain of the instance we are working with.
             keychain["starlight_instance_domain"] = instanceDomain
+            Chica.INSTANCE_DOMAIN = instanceDomain
 
             //  Now, we change the state of the oauth to .signInProgress
             authState = .signinInProgress
@@ -94,7 +95,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
                 [
                     "client_name": "Starlight",
-                    "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
+                    "redirect_uri": "\(Chica.URL_PREFIX)\(URL_SUFFIX)",
                     "scopes": scopes.joined(separator: " "),
                     "website": "https://hyperspace.marquiskurt.net"
                 ]
@@ -162,7 +163,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     static private let URL_PREFIX = "starlight://"
 
     /// The domain (without the prefixes) of the instance.
-    static let INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.social"
+    static var INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.social"
 
     static public let API_URL = URL(string: "https://\(INSTANCE_DOMAIN)")!
 

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import chica
+import Chica
 
 @main
 struct ExampleProjectApp: App {
@@ -14,7 +14,7 @@ struct ExampleProjectApp: App {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
-                    Chica.OAuth.handleURL()
+                    Chica.handleURL(url: url)
                 }
         }
     }
