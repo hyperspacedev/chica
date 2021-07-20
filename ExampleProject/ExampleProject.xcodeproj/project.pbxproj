@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FA56043326A778A5007F5160 /* Chica in Frameworks */ = {isa = PBXBuildFile; productRef = FA56043226A778A5007F5160 /* Chica */; };
+		FA56043626A77953007F5160 /* Chica in Frameworks */ = {isa = PBXBuildFile; productRef = FA56043526A77953007F5160 /* Chica */; };
 		FA6CAED726A6BB9C00E1FA29 /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAEC926A6BB9B00E1FA29 /* ExampleProjectApp.swift */; };
 		FA6CAED826A6BB9C00E1FA29 /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAEC926A6BB9B00E1FA29 /* ExampleProjectApp.swift */; };
 		FA6CAED926A6BB9C00E1FA29 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAECA26A6BB9B00E1FA29 /* ContentView.swift */; };
@@ -39,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA56043326A778A5007F5160 /* Chica in Frameworks */,
+				FA56043626A77953007F5160 /* Chica in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,7 +112,7 @@
 			);
 			name = "ExampleProject (macOS)";
 			packageProductDependencies = (
-				FA56043226A778A5007F5160 /* Chica */,
+				FA56043526A77953007F5160 /* Chica */,
 			);
 			productName = "ExampleProject (macOS)";
 			productReference = FA6CAED626A6BB9C00E1FA29 /* ExampleProject.app */;
@@ -146,7 +146,7 @@
 			);
 			mainGroup = FA6CAEC326A6BB9B00E1FA29;
 			packageReferences = (
-				FA56043126A778A5007F5160 /* XCRemoteSwiftPackageReference "chica" */,
+				FA56043426A77953007F5160 /* XCRemoteSwiftPackageReference "chica" */,
 			);
 			productRefGroup = FA6CAED126A6BB9C00E1FA29 /* Products */;
 			projectDirPath = "";
@@ -468,7 +468,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		FA56043126A778A5007F5160 /* XCRemoteSwiftPackageReference "chica" */ = {
+		FA56043426A77953007F5160 /* XCRemoteSwiftPackageReference "chica" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "file:///Users/alex/Documents/github/Xcode/chica/";
 			requirement = {
@@ -479,9 +479,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		FA56043226A778A5007F5160 /* Chica */ = {
+		FA56043526A77953007F5160 /* Chica */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FA56043126A778A5007F5160 /* XCRemoteSwiftPackageReference "chica" */;
+			package = FA56043426A77953007F5160 /* XCRemoteSwiftPackageReference "chica" */;
 			productName = Chica;
 		};
 /* End XCSwiftPackageProductDependency section */

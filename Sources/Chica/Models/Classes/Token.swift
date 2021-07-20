@@ -23,7 +23,7 @@ public class Token: Codable, Identifiable {
     public let tokenType: String
 
     /// The OAuth scopes granted by this token, space-separated.
-    public let scopes: String
+    public let scope: String
 
     /// When the token was generated.
     public let createdAt: Date
@@ -33,7 +33,7 @@ public class Token: Codable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case tokenType = "token_type"
-        case scopes
+        case scope
         case createdAt = "created_at"
     }
 }
