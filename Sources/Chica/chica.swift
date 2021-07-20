@@ -108,7 +108,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             //  Then, we generate the url we need to visit for authorizing the user
             let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
                 .queryItem("client_id", value: client?.clientId)
-                .queryItem("redirect_uris", value: "\(URL_PREFIX)\(URL_SUFFIX)")
+                .queryItem("redirect_uri", value: "\(URL_PREFIX)\(URL_SUFFIX)")
                 .queryItem("scopes", value: scopes.joined(separator: " "))
                 .queryItem("website", value: "https://hyperspace.marquiskurt.net")
 
