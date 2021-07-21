@@ -198,6 +198,10 @@ Contribution guidelines are available in the [contributing file][cf] and when yo
 
 If you want to aid the project in other ways, consider supporting the project on [Patreon](https://patreon.com/hyperspacedev).
 
+## Special Thanks
+
+This library was inspired in [RedditOS](https://github.com/Dimillian/RedditOS/tree/master/RedditOs), by [**Thomas Ricouard**](https://github.com/Dimillian).
+
 <!-- Links -->
 [starlight]: https://github.com/hyperspacedev/starlight
 [sl]: https://github.com/realm/swiftlint
