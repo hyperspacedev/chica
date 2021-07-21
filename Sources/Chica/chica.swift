@@ -163,7 +163,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     static private let URL_PREFIX = "starlight://"
 
     /// The domain (without the prefixes) of the instance.
-    static var INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.social"
+    static var INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.online"
 
     static public let API_URL = URL(string: "https://\(INSTANCE_DOMAIN)")!
 
