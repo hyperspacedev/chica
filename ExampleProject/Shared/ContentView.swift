@@ -19,7 +19,7 @@ struct ContentView: View {
             TextField("Instance domain", text: self.$instance)
 
             Button(action: {
-                async {
+                Task.init {
                     await Chica.OAuth.shared.startOauthFlow(for: self.instance.lowercased())
                 }
             }, label: {

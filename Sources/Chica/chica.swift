@@ -116,31 +116,39 @@ public class Chica: ObservableObject, CustomStringConvertible {
             openURL(url)
         }
 
+        /// Continues with the OAuth flow after obtaining the user authorization code from the redirect URI
         public func continueOauthFlow(_ url: URL) async {
 
             if let code = url.queryParameters?.first(where: { $0.key == "code" }) {
 
-                let keychain = Keychain(service: Chica.OAuth.keychainService)
-
-                //  We now have the user code, so now all we need to do is retrieve our token
-                let token: Token? = try! await Chica.shared.request(.post, for: .token, params:
-                    [
-                        "client_id": keychain["starlight_client_id"]!,
-                        "client_secret": keychain["starlight_client_secret"]!,
-                        "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
-                        "grant_type": "authorization_code",
-                        "code": code.value,
-                        "scope": scopes.joined(separator: " ")
-                    ]
-                )
-
-                //  We store the token in the keychain
-                keychain["starlight_acess_token"] = token?.accessToken
-
-                //  And, finally, we change the state to use the token we just retrieved.
-                self.authState = .authenthicated(authToken: token!.accessToken)
+                await continueOauthFlow(code.value)
 
             }
+
+        }
+
+        /// Continues with the OAuth flow after obtaining the user authorization code from the redirect URI
+        public func continueOauthFlow(_ code: String) async {
+
+            let keychain = Keychain(service: Chica.OAuth.keychainService)
+
+            //  We now have the user code, so now all we need to do is retrieve our token
+            let token: Token? = try! await Chica.shared.request(.post, for: .token, params:
+                [
+                    "client_id": keychain["starlight_client_id"]!,
+                    "client_secret": keychain["starlight_client_secret"]!,
+                    "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
+                    "grant_type": "authorization_code",
+                    "code": code,
+                    "scope": scopes.joined(separator: " ")
+                ]
+            )
+
+            //  We store the token in the keychain
+            keychain["starlight_acess_token"] = token?.accessToken
+
+            //  And, finally, we change the state to use the token we just retrieved.
+            self.authState = .authenthicated(authToken: token!.accessToken)
 
         }
 
@@ -213,13 +221,21 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     }
 
-    public static func handleURL(url: URL) {
+    public static func handleURL(url: URL, actions: [String: ([String: String]?) -> Void]) {
         if url.absoluteString.hasPrefix(self.URL_PREFIX) {
             if url.absoluteString.contains("oauth") {
                 Task.init {
                     await OAuth.shared.continueOauthFlow(url)
                 }
+            } else {
+                for action in actions {
+                    if url.absoluteString.contains(action.key) {
+                        action.value(url.queryParameters)
+                    }
+                }
             }
+        } else {
+            print("Cannot handle url: URL is not valid.")
         }
     }
 

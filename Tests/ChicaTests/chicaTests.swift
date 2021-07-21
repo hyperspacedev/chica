@@ -22,11 +22,32 @@ final class chicaTests: XCTestCase {
 
     }
 
+    func doWhatever(_ parameters: [String : String]?) {
+        print("RECEIVED DEEP LINK...")
+        if let parameters = parameters {
+            for parameter in parameters {
+                print("\(parameter.key) : \(parameter.value)")
+            }
+        }
+    }
+
     func testBasicRequests() async throws {
 
         let account = try! await getAccount(id: "1")
-        XCTAssertEqual(account!.username, "Gargron")
+
+        if Chica.INSTANCE_DOMAIN == "mastodon.social" {
+            XCTAssertEqual(account!.username, "Gargron")
+        } else if Chica.INSTANCE_DOMAIN == "mastodon.technology" {
+            XCTAssertEqual(account!.username, "ashfurrow")
+        }
+        
         XCTAssertEqual(account!.id, "1")
+
+        Chica.handleURL(url: URL(string: "starlight://whatever?test=true")!, actions:
+            [
+                "whatever" : { [self] parameters in doWhatever(parameters) }
+            ]
+        )
 
 //        XCTAssertThrowsError(async { try await getAccount(id: "0932840923890482309409238409380948") })
 
@@ -34,8 +55,6 @@ final class chicaTests: XCTestCase {
 }
 
 func getAccount(id: String) async throws -> Account? {
-    let account: Account? = try await Chica().request(.get, for: .account(id: id))
-
-    return account
+    return try await Chica().request(.get, for: .account(id: id))
 }
 
