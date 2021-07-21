@@ -34,7 +34,7 @@
 
 ## Quick Start 🏃‍♂️
 
-> :warning: The following source code is highly experimental and  has been designed in a version of Swift that is still in beta, which will result in this code changing over time. The following code may or may not result in a final product shipped to consumers.
+> :warning: The following source code is highly experimental and has been designed in a version of Swift that is still in beta, which will result in this code changing over time. The following code may or may not result in a final product shipped to consumers.
 
 While `chica` is just [starlight][starlight]'s backend put into a separated swift package, you can still import it to your project if you want to work with Mastodon and Twitter endpoints. Think of it as a Twitter + Mastodon API for Swift 5.5, that takes advantage of the new concurrency model.
 
@@ -62,13 +62,13 @@ Now just `import Chica`, and you're ready to go!
 
 - **Learn how the new concurrency model works —** The main benefit of being open-source is that the code is, well, open – and everybody can check it and even contribute to it. Thanks to this, `chica` can serve as a guide for people who want to see some real-examples of the new async/await features introduced by Apple in Swift 5.5.
 
-- **Build tools that leverage the Fediverse or Twitter —** There is no reason why `chica` should only be limited for building apps: it can be used for everything! You can use it for building command line interfaces that interact with these social networks, or you can build a bot that automatically toots whatever you post on twitter (or viceversa); who knows what beatiful things you can achieve with this!
+- **Build tools that leverage the Fediverse or Twitter —** There is no reason why `chica` should only be limited for building apps: it can be used for everything! You can use it for building command line interfaces that interact with these social networks, or you can build a bot that automatically toots whatever you post on twitter (or vice-versa); who knows what beatiful things you can achieve with this!
 
 Found a novel use? We'd love to hear about it!
 
 ## Licensing
 
-Codename Starlight and it's respective subprojects are licensed under the Non-Violent Public License, the same license used in Hyperspace Desktop. This is a semi-permissive license that allows modifications and redistributions as long as the software is not used to harm another person or cause conflict. You can read your rights in the attached [LICENSE][license] file.
+Codename Starlight and its respective subprojects are licensed under the Non-Violent Public License, the same license used in Hyperspace Desktop. This is a semi-permissive license that allows modifications and redistributions as long as the software is not used to harm another person or cause conflict. You can read your rights in the attached [LICENSE][license] file.
 
 ## Contributions
 
