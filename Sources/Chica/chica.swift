@@ -216,7 +216,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     public static func handleURL(url: URL) {
         if url.absoluteString.hasPrefix(self.URL_PREFIX) {
             if url.absoluteString.contains("oauth") {
-                async {
+                Task.init {
                     await OAuth.shared.continueOauthFlow(url)
                 }
             }
