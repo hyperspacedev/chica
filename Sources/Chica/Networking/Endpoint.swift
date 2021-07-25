@@ -104,6 +104,9 @@ public enum Endpoint {
     /// A list of of custom emojis this server has registered.
     case customEmojis
     
+    /// A list of trending tags with their history.
+    case trending
+    
 
     //  MARK: – GENERAL
     // Methods concerning performing general actions or retrieving general information from accounts.
@@ -146,6 +149,8 @@ public enum Endpoint {
             return "/api/v1/instance"
         case .customEmojis:
             return "/api/v1/custom_emojis"
+        case .trending:
+            return "/api/v1/trends"
         default: return ""
         }
     }
