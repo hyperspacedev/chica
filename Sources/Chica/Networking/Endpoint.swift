@@ -94,6 +94,16 @@ public enum Endpoint {
 
     /// Sets a private note on a user.
     case noteOnAccount(id: String)
+    
+    // MARK: - COMMUNITY INFORMATION
+    // Methods pertaining to information about the current instance (community) they reside in.
+    
+    /// Information about the current server they reside in.
+    case instance
+    
+    /// A list of of custom emojis this server has registered.
+    case customEmojis
+    
 
     //  MARK: – GENERAL
     // Methods concerning performing general actions or retrieving general information from accounts.
@@ -132,6 +142,10 @@ public enum Endpoint {
             return "/api/v1/accounts/\(id)/statuses"
         case let .accountFollowers(id):
             return "/api/v1/accounts/\(id)/statuses"
+        case .instance:
+            return "/api/v1/instance"
+        case .customEmojis:
+            return "/api/v1/custom_emojis"
         default: return ""
         }
     }
