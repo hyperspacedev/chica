@@ -162,7 +162,7 @@ public enum Endpoint {
             return "/api/v1/trends"
         case .timeline(let scope):
             return scope.path
-        case .context(id):
+        case let .context(id):
             return "/api/v1/statuses/\(id)/context"
         default: return ""
         }
