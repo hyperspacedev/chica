@@ -117,9 +117,14 @@ public enum Endpoint {
     /// Search for matching accounts by username or display name.
     case search
     
-    // MARK: - TIMELINES
+    // MARK: - TIMELINES AND STATUSES
     // Methods pertaining to interacting with timelines.
+    
+    /// Get a list of posts from a particular timeline.
     case timeline(scope: TimelineScope)
+    
+    /// Get the parenst and children to a given status.
+    case context(id: String)
 
     /// Full path
     var path: String {
@@ -157,6 +162,8 @@ public enum Endpoint {
             return "/api/v1/trends"
         case .timeline(let scope):
             return scope.path
+        case .context(id):
+            return "/api/v1/statuses/\(id)/context"
         default: return ""
         }
     }
