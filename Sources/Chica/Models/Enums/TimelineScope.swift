@@ -10,11 +10,12 @@ import Foundation
 /// An enumeration that represents the different types of timelines.
 public enum TimelineScope {
     
-    /// The public, federated timeline.
-    case `public`
-    
-    /// The local timeline relative to the current user's instance.
-    case local
+    /// The local or public timeline.
+    ///
+    /// This uses the same endpoint to fetch timeline data. To specify local data, include the `local` parameter in your request.
+    /// - Example:
+    ///     `try await Chica.shared.request(.get, for: .network, params: ["local": "true"])`
+    case network
     
     /// The user's timeline.
     case home
@@ -33,10 +34,8 @@ public enum TimelineScope {
         switch self {
         case .home:
             return "/api/v1/timelines/home"
-        case .public:
+        case .network:
             return "/api/v1/timelines/public"
-        case .local:
-            return "/api/v1/timelines/public?local=true"
         case .messages:
             return "/api/v1/conversations"
         case .list(let id):
