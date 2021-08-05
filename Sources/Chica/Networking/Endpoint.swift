@@ -116,6 +116,10 @@ public enum Endpoint {
 
     /// Search for matching accounts by username or display name.
     case search
+    
+    // MARK: - TIMELINES
+    // Methods pertaining to interacting with timelines.
+    case timeline(scope: TimelineScope)
 
     /// Full path
     var path: String {
@@ -151,6 +155,8 @@ public enum Endpoint {
             return "/api/v1/custom_emojis"
         case .trending:
             return "/api/v1/trends"
+        case .timeline(let scope):
+            return scope.path
         default: return ""
         }
     }
