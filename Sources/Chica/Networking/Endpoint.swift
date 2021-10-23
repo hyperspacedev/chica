@@ -129,6 +129,9 @@ public enum Endpoint {
     /// Get the parenst and children to a given status.
     case context(id: String)
 
+    /// The user's notifications.
+    case notifications
+
     // MARK: - ENDPOINT MAPPING
 
     /// Full path
@@ -169,6 +172,8 @@ public enum Endpoint {
             return "/api/v1/statuses/\(id)/context"
         case .directory:
             return "/api/v1/directory"
+        case .notifications:
+            return "/api/v1/notifications"
         default: return ""
         }
     }
