@@ -106,6 +106,9 @@ public enum Endpoint {
     
     /// A list of trending tags with their history.
     case trending
+
+    /// A list of accounts that are visible in the instance's directory.
+    case directory
     
 
     //  MARK: – GENERAL
@@ -126,12 +129,12 @@ public enum Endpoint {
     /// Get the parenst and children to a given status.
     case context(id: String)
 
+    // MARK: - ENDPOINT MAPPING
+
     /// Full path
     var path: String {
 
         switch self {
-
-        // Accounts
         case .apps:
             return "/api/v1/apps"
         case .verifyAppCredentials:
@@ -164,6 +167,8 @@ public enum Endpoint {
             return scope.path
         case let .context(id):
             return "/api/v1/statuses/\(id)/context"
+        case .directory:
+            return "/api/v1/directory"
         default: return ""
         }
     }
