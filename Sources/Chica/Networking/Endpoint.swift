@@ -33,7 +33,9 @@ public enum Endpoint {
 
     //  MARK: - ACCOUNTS
     // Methods concerning user accounts and related information.
-   
+
+
+
     //  MARK: – CREDENTIALS
     // Methods concerning working with an account's credentials
 
@@ -47,7 +49,7 @@ public enum Endpoint {
     case updateCredentials
 
     //  MARK: – INFORMATION
-    /// Methods concerning retrieving an account's related information.
+    // Methods concerning retrieving an account's related information.
     
     /// View information about a profile.
     case account(id: String)
@@ -109,7 +111,7 @@ public enum Endpoint {
 
     /// A list of accounts that are visible in the instance's directory.
     case directory
-    
+
 
     //  MARK: – GENERAL
     // Methods concerning performing general actions or retrieving general information from accounts.
@@ -131,6 +133,9 @@ public enum Endpoint {
 
     /// The user's notifications.
     case notifications
+
+    /// Post a status to the user's profile, or request a status with a given ID.
+    case statuses(id: String? = nil)
 
     // MARK: - ENDPOINT MAPPING
 
@@ -174,6 +179,9 @@ public enum Endpoint {
             return "/api/v1/directory"
         case .notifications:
             return "/api/v1/notifications"
+        case .statuses(id):
+            let pathExtension = (id == nil) ? "" : "/\(id!)"
+            return "/api/v1/statuses" + pathExtension
         default: return ""
         }
     }
