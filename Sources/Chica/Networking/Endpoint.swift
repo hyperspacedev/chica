@@ -179,8 +179,8 @@ public enum Endpoint {
             return "/api/v1/directory"
         case .notifications:
             return "/api/v1/notifications"
-        case .statuses(id):
-            let pathExtension = (id == nil) ? "" : "/\(id!)"
+        case .statuses(let statusId):
+            let pathExtension: String = statusId == nil ? "" : "/\(statusId!)"
             return "/api/v1/statuses" + pathExtension
         default: return ""
         }
