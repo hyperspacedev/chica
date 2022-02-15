@@ -109,7 +109,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
                 .queryItem("client_id", value: client?.clientId)
                 .queryItem("redirect_uri", value: "\(URL_PREFIX)\(URL_SUFFIX)")
-                .queryItem("scopes", value: scopes.joined(separator: " "))
+                .queryItem("scope", value: scopes.joined(separator: " "))
                 .queryItem("response_type", value: "code")
 
             //  And finally, we open the url in the browser.
