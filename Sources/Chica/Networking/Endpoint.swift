@@ -137,6 +137,29 @@ public enum Endpoint {
     /// Post a status to the user's profile, or request a status with a given ID.
     case statuses(id: String? = nil)
 
+    // MARK: - ACTIONS
+    // Methods pertaining to actions that can be performed on statuses.
+
+    /// Like or favorite a status.
+    /// - Note: This endpoint is spelled with the British spelling to maintain Mastodon API consistency.
+    case favourite(id: String)
+
+    /// Undo a like or favorite a status.
+    /// - Note: This endpoint is spelled with the British spelling to maintain Mastodon API consistency.
+    case unfavorite(id: String)
+
+    /// Reblog a status.
+    case reblog(id: String)
+
+    /// Undo a reblog of a status.
+    case unreblog(id:String)
+
+    /// Privately save a status to an account's bookmarks.
+    case save(id: String)
+
+    /// Remove a status from an account's bookmarks.
+    case undoSave(id: String)
+
     // MARK: - ENDPOINT MAPPING
 
     /// Full path
@@ -182,6 +205,18 @@ public enum Endpoint {
         case .statuses(let statusId):
             let pathExtension: String = statusId == nil ? "" : "/\(statusId!)"
             return "/api/v1/statuses" + pathExtension
+        case .favourite(let statusId):
+            return "/api/v1/statuses/\(statusId)/favourite"
+        case .unfavorite(let statusId):
+            return "/api/v1/statuses/\(statusId)/unfavourite"
+        case .reblog(let statusId):
+            return "/api/v1/statuses/\(statusId)/reblog"
+        case .unreblog(let statusId):
+            return "/api/v1/statuses/\(statusId)/unreblog"
+        case .save(let statusId):
+            return "/api/v1/statuses/\(statusId)/bookmark"
+        case .undoSave(let statusId):
+            return "/api/v1/statuses/\(statusId)/unbookmark"
         default: return ""
         }
     }
