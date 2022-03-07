@@ -95,7 +95,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
                 [
                     "client_name": "Starlight",
-                    "redirect_uris": "\(Chica.URL_PREFIX)\(URL_SUFFIX)",
+                    "redirect_uris": "\(Chica.shared.urlPrefix)\(URL_SUFFIX)",
                     "scopes": scopes.joined(separator: " "),
                     "website": "https://hyperspace.marquiskurt.net"
                 ]
@@ -108,7 +108,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             //  Then, we generate the url we need to visit for authorizing the user
             let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
                 .queryItem("client_id", value: client?.clientId)
-                .queryItem("redirect_uri", value: "\(URL_PREFIX)\(URL_SUFFIX)")
+                .queryItem("redirect_uri", value: "\(Chica.shared.urlPrefix)\(URL_SUFFIX)")
                 .queryItem("scope", value: scopes.joined(separator: " "))
                 .queryItem("response_type", value: "code")
 
@@ -137,7 +137,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
                 [
                     "client_id": keychain["starlight_client_id"]!,
                     "client_secret": keychain["starlight_client_secret"]!,
-                    "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
+                    "redirect_uri": "\(Chica.shared.urlPrefix)\(URL_SUFFIX)",
                     "grant_type": "authorization_code",
                     "code": code,
                     "scope": scopes.joined(separator: " ")
@@ -168,7 +168,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     //  MARK: – URLs
 
     /// The url prefix
-    static private let URL_PREFIX = "starlight://"
+    static private let DEFAULT_URL_PREFIX = "starlight://"
 
     /// The domain (without the prefixes) of the instance.
     static var INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.online"
@@ -180,6 +180,8 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     private var session: URLSession
 
+    fileprivate var urlPrefix: String
+
     private var oauthStateCancellable: AnyCancellable?
 
     //  MARK: - INITIALIZERS
@@ -187,6 +189,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     public init() {
 
         _ = isOnMainThread(named: "CLIENT STARTED")
+        urlPrefix = Chica.DEFAULT_URL_PREFIX
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
@@ -221,21 +224,29 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     }
 
+    /// Sets the URL prefix of the Chica client.
+    /// - Parameter urlPrefix: The URL prefix to use with this client.
+    ///
+    /// During instantiation, URL prefix is set to `starlight://`.
+    public func setRequestPrefix(to urlPrefix: String) {
+        self.urlPrefix = urlPrefix
+    }
+
     public static func handleURL(url: URL, actions: [String: ([String: String]?) -> Void]) {
-        if url.absoluteString.hasPrefix(self.URL_PREFIX) {
-            if url.absoluteString.contains("oauth") {
-                Task.init {
-                    await OAuth.shared.continueOauthFlow(url)
-                }
-            } else {
-                for action in actions {
-                    if url.absoluteString.contains(action.key) {
-                        action.value(url.queryParameters)
-                    }
-                }
+        if !url.absoluteString.hasPrefix(Chica.shared.urlPrefix) {
+            print("Cannot handle URL: URL is not valid (\(url.absoluteString)).")
+            return
+        }
+        if url.absoluteString.contains("oauth") {
+            Task.init {
+                await OAuth.shared.continueOauthFlow(url)
             }
         } else {
-            print("Cannot handle url: URL is not valid.")
+            for action in actions {
+                if url.absoluteString.contains(action.key) {
+                    action.value(url.queryParameters)
+                }
+            }
         }
     }
 
