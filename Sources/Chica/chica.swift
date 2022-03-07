@@ -224,12 +224,23 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     }
 
-    /// Sets the URL prefix of the Chica client.
+    /// Sets the URL prefix of the Chica client when making requests.
     /// - Parameter urlPrefix: The URL prefix to use with this client.
     ///
-    /// During instantiation, URL prefix is set to `starlight://`.
+    /// When the Chica class is first instantiated, the default URL prefix used is `starlight://`. When this method is
+    /// called, any future requests made with ``request(_:for:params:)`` will use the new URL prefix.
+    ///
+    /// - Important: The URL prefix that is assigned to Chica should be a valid URL prefix type registered with your
+    ///     app in Xcode or in the app's Info.plist.
     public func setRequestPrefix(to urlPrefix: String) {
         self.urlPrefix = urlPrefix
+    }
+
+    /// Resets the URL prefix of the Chica client to the default URL prefix.
+    ///
+    /// When calling this method, future requests will use the default URL prefix of `starlight://`.
+    public func resetRequestPrefix() {
+        self.urlPrefix = Chica.DEFAULT_URL_PREFIX
     }
 
     public static func handleURL(url: URL, actions: [String: ([String: String]?) -> Void]) {
