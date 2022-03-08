@@ -79,7 +79,10 @@ public class Chica: ObservableObject, CustomStringConvertible {
         }
 
         /// Returns the URL that needs to be opened in the browser to allow the user to complete registration.
-        public func startOauthFlow(for instanceDomain: String) async {
+        /// - Parameter instanceDomain: The domain in which the instance lies to start authorization for.
+        /// - Parameter authHandler: An optional closure that runs once the URL is created to open. Defaults to
+        ///     nil, using `openURL` instead.
+        public func startOauthFlow(for instanceDomain: String, authHandler: ((URL) -> Void)? = nil) async {
 
             //  First, we initialize the keychain object
             let keychain = Keychain(service: Chica.OAuth.keychainService)
@@ -113,7 +116,11 @@ public class Chica: ObservableObject, CustomStringConvertible {
                 .queryItem("response_type", value: "code")
 
             //  And finally, we open the url in the browser.
-            openURL(url)
+            if let handler = authHandler {
+                handler(url)
+            } else {
+                openURL(url)
+            }
         }
 
         /// Continues with the OAuth flow after obtaining the user authorization code from the redirect URI
