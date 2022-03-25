@@ -3,7 +3,7 @@
     "pins": [
       {
         "package": "chica",
-        "repositoryURL": "/Users/alex/Documents/github/Xcode/chica/",
+        "repositoryURL": "https://github.com/hyperspacedev/chica",
         "state": {
           "branch": "main",
           "revision": "a65eaf9c395539adf3acfc6e7be992ccee817ad1",

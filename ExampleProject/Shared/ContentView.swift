@@ -10,7 +10,7 @@ import Chica
 
 struct ContentView: View {
 
-    @State var instance: String = ""
+    @Environment(\.deeplink) var deeplink
 
     var body: some View {
 

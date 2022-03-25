@@ -43,12 +43,6 @@ final class chicaTests: XCTestCase {
         
         XCTAssertEqual(account!.id, "1")
 
-        Chica.handleURL(url: URL(string: "starlight://whatever?test=true")!, actions:
-            [
-                "whatever" : { [self] parameters in doWhatever(parameters) }
-            ]
-        )
-
 //        XCTAssertThrowsError(async { try await getAccount(id: "0932840923890482309409238409380948") })
 
     }

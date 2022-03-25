@@ -1,3 +1,22 @@
+/*
+*   THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS
+*   NON-VIOLENT PUBLIC LICENSE v4 ("LICENSE"). THE WORK IS PROTECTED BY
+*   COPYRIGHT AND ALL OTHER APPLICABLE LAWS. ANY USE OF THE WORK OTHER THAN
+*   AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED. BY
+*   EXERCISING ANY RIGHTS TO THE WORK PROVIDED IN THIS LICENSE, YOU AGREE
+*   TO BE BOUND BY THE TERMS OF THIS LICENSE. TO THE EXTENT THIS LICENSE
+*   MAY BE CONSIDERED TO BE A CONTRACT, THE LICENSOR GRANTS YOU THE RIGHTS
+*   CONTAINED HERE IN AS CONSIDERATION FOR ACCEPTING THE TERMS AND
+*   CONDITIONS OF THIS LICENSE AND FOR AGREEING TO BE BOUND BY THE TERMS
+*   AND CONDITIONS OF THIS LICENSE.
+*
+*   This source file is part of the Codename Starlight open source project
+*   This file was created by Alejandro Modroño Vara on 14/7/21.
+*
+*   See `LICENSE.txt` for license information
+*   See `CONTRIBUTORS.txt` for project authors
+*
+*/
 import Foundation
 import KeychainAccess
 import SwiftUI
@@ -98,7 +117,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
                 [
                     "client_name": "Starlight",
-                    "redirect_uris": "\(Chica.shared.urlPrefix)\(URL_SUFFIX)",
+                    "redirect_uris": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
                     "scopes": scopes.joined(separator: " "),
                     "website": "https://hyperspace.marquiskurt.net"
                 ]
@@ -111,7 +130,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             //  Then, we generate the url we need to visit for authorizing the user
             let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
                 .queryItem("client_id", value: client?.clientId)
-                .queryItem("redirect_uri", value: "\(Chica.shared.urlPrefix)\(URL_SUFFIX)")
+                .queryItem("redirect_uri", value: "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)")
                 .queryItem("scope", value: scopes.joined(separator: " "))
                 .queryItem("response_type", value: "code")
 
@@ -144,7 +163,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
                 [
                     "client_id": keychain["starlight_client_id"]!,
                     "client_secret": keychain["starlight_client_secret"]!,
-                    "redirect_uri": "\(Chica.shared.urlPrefix)\(URL_SUFFIX)",
+                    "redirect_uri": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
                     "grant_type": "authorization_code",
                     "code": code,
                     "scope": scopes.joined(separator: " ")
@@ -175,7 +194,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     //  MARK: – URLs
 
     /// The url prefix
-    static private let DEFAULT_URL_PREFIX = "starlight://"
+    static private let DEFAULT_URL_PREFIX = "starlight"
 
     /// The domain (without the prefixes) of the instance.
     static var INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.online"
@@ -187,7 +206,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     private var session: URLSession
 
-    fileprivate var urlPrefix: String
+    public var urlPrefix: String
 
     private var oauthStateCancellable: AnyCancellable?
 
@@ -248,24 +267,6 @@ public class Chica: ObservableObject, CustomStringConvertible {
     /// When calling this method, future requests will use the default URL prefix of `starlight://`.
     public func resetRequestPrefix() {
         self.urlPrefix = Chica.DEFAULT_URL_PREFIX
-    }
-
-    public static func handleURL(url: URL, actions: [String: ([String: String]?) -> Void]) {
-        if !url.absoluteString.hasPrefix(Chica.shared.urlPrefix) {
-            print("Cannot handle URL: URL is not valid (\(url.absoluteString)).")
-            return
-        }
-        if url.absoluteString.contains("oauth") {
-            Task.init {
-                await OAuth.shared.continueOauthFlow(url)
-            }
-        } else {
-            for action in actions {
-                if url.absoluteString.contains(action.key) {
-                    action.value(url.queryParameters)
-                }
-            }
-        }
     }
 
     /// Returns a URLRequest with the specified URL, http method, and query parameters.
