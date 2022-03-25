@@ -79,7 +79,10 @@ public class Chica: ObservableObject, CustomStringConvertible {
         }
 
         /// Returns the URL that needs to be opened in the browser to allow the user to complete registration.
-        public func startOauthFlow(for instanceDomain: String) async {
+        /// - Parameter instanceDomain: The domain in which the instance lies to start authorization for.
+        /// - Parameter authHandler: An optional closure that runs once the URL is created to open. Defaults to
+        ///     nil, using `openURL` instead.
+        public func startOauthFlow(for instanceDomain: String, authHandler: ((URL) -> Void)? = nil) async {
 
             //  First, we initialize the keychain object
             let keychain = Keychain(service: Chica.OAuth.keychainService)
@@ -95,7 +98,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
             let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
                 [
                     "client_name": "Starlight",
-                    "redirect_uris": "\(Chica.URL_PREFIX)\(URL_SUFFIX)",
+                    "redirect_uris": "\(Chica.shared.urlPrefix)\(URL_SUFFIX)",
                     "scopes": scopes.joined(separator: " "),
                     "website": "https://hyperspace.marquiskurt.net"
                 ]
@@ -108,12 +111,16 @@ public class Chica: ObservableObject, CustomStringConvertible {
             //  Then, we generate the url we need to visit for authorizing the user
             let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
                 .queryItem("client_id", value: client?.clientId)
-                .queryItem("redirect_uri", value: "\(URL_PREFIX)\(URL_SUFFIX)")
+                .queryItem("redirect_uri", value: "\(Chica.shared.urlPrefix)\(URL_SUFFIX)")
                 .queryItem("scope", value: scopes.joined(separator: " "))
                 .queryItem("response_type", value: "code")
 
             //  And finally, we open the url in the browser.
-            openURL(url)
+            if let handler = authHandler {
+                handler(url)
+            } else {
+                openURL(url)
+            }
         }
 
         /// Continues with the OAuth flow after obtaining the user authorization code from the redirect URI
@@ -137,7 +144,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
                 [
                     "client_id": keychain["starlight_client_id"]!,
                     "client_secret": keychain["starlight_client_secret"]!,
-                    "redirect_uri": "\(URL_PREFIX)\(URL_SUFFIX)",
+                    "redirect_uri": "\(Chica.shared.urlPrefix)\(URL_SUFFIX)",
                     "grant_type": "authorization_code",
                     "code": code,
                     "scope": scopes.joined(separator: " ")
@@ -168,7 +175,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     //  MARK: – URLs
 
     /// The url prefix
-    static private let URL_PREFIX = "starlight://"
+    static private let DEFAULT_URL_PREFIX = "starlight://"
 
     /// The domain (without the prefixes) of the instance.
     static var INSTANCE_DOMAIN: String = Keychain(service: OAuth.keychainService)["starlight_instance_domain"] ?? "mastodon.online"
@@ -180,6 +187,8 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     private var session: URLSession
 
+    fileprivate var urlPrefix: String
+
     private var oauthStateCancellable: AnyCancellable?
 
     //  MARK: - INITIALIZERS
@@ -187,6 +196,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
     public init() {
 
         _ = isOnMainThread(named: "CLIENT STARTED")
+        urlPrefix = Chica.DEFAULT_URL_PREFIX
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
@@ -221,21 +231,40 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     }
 
+    /// Sets the URL prefix of the Chica client when making requests.
+    /// - Parameter urlPrefix: The URL prefix to use with this client.
+    ///
+    /// When the Chica class is first instantiated, the default URL prefix used is `starlight://`. When this method is
+    /// called, any future requests made with ``request(_:for:params:)`` will use the new URL prefix.
+    ///
+    /// - Important: The URL prefix that is assigned to Chica should be a valid URL prefix type registered with your
+    ///     app in Xcode or in the app's Info.plist.
+    public func setRequestPrefix(to urlPrefix: String) {
+        self.urlPrefix = urlPrefix
+    }
+
+    /// Resets the URL prefix of the Chica client to the default URL prefix.
+    ///
+    /// When calling this method, future requests will use the default URL prefix of `starlight://`.
+    public func resetRequestPrefix() {
+        self.urlPrefix = Chica.DEFAULT_URL_PREFIX
+    }
+
     public static func handleURL(url: URL, actions: [String: ([String: String]?) -> Void]) {
-        if url.absoluteString.hasPrefix(self.URL_PREFIX) {
-            if url.absoluteString.contains("oauth") {
-                Task.init {
-                    await OAuth.shared.continueOauthFlow(url)
-                }
-            } else {
-                for action in actions {
-                    if url.absoluteString.contains(action.key) {
-                        action.value(url.queryParameters)
-                    }
-                }
+        if !url.absoluteString.hasPrefix(Chica.shared.urlPrefix) {
+            print("Cannot handle URL: URL is not valid (\(url.absoluteString)).")
+            return
+        }
+        if url.absoluteString.contains("oauth") {
+            Task.init {
+                await OAuth.shared.continueOauthFlow(url)
             }
         } else {
-            print("Cannot handle url: URL is not valid.")
+            for action in actions {
+                if url.absoluteString.contains(action.key) {
+                    action.value(url.queryParameters)
+                }
+            }
         }
     }
 
