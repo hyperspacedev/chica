@@ -38,7 +38,7 @@ public class Deeplinker {
     /// The types of deeplinks that the application expects.
     public enum Deeplink: Equatable, CaseIterable {
 
-        static var allCases: [Deeplinker.Deeplink] {
+        public static var allCases: [Deeplinker.Deeplink] {
             return [.home, .oauth(code: ""), .profile(id: "")]
         }
 
@@ -47,7 +47,7 @@ public class Deeplinker {
         case profile(id: String)
 
         /// The keyword of the deeplink.
-        var description: String {
+        public var description: String {
             switch self {
             case .home:
                 return "home"

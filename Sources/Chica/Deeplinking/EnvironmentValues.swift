@@ -21,7 +21,7 @@ import Foundation
 import SwiftUI
 
 public struct DeeplinkKey: EnvironmentKey {
-    static var defaultValue: Deeplinker.Deeplink? {
+    public static var defaultValue: Deeplinker.Deeplink? {
         return nil
     }
 }
