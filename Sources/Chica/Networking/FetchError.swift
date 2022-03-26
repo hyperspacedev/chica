@@ -13,6 +13,7 @@ import Foundation
 public enum FetchError: Error {
 
     case unknown(data: Data)
+    case unknownError(error: Error)
     case message(reason: String, data: Data)
     case parseError(reason: Error)
     case mastodonAPIError(error: MastodonError, data: Data)
@@ -49,6 +50,17 @@ public enum FetchError: Error {
                 throw FetchError.unknown(data: data)
 
             }
+        }
+    }
+}
+
+extension FetchError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknownError(let error):
+            return "\(error)"
+        default:
+            return "Use \"FetchError.processResponse()\" to get more information."
         }
     }
 }

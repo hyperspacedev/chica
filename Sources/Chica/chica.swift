@@ -113,15 +113,21 @@ public class Chica: ObservableObject, CustomStringConvertible {
             //  Now, we change the state of the oauth to .signInProgress
             authState = .signinInProgress
 
-            //  We then do a POST request to create an application on the specified mastodon instance.
-            let client: Application? = try! await Chica.shared.request(.post, for: .apps, params:
-                [
-                    "client_name": "Starlight",
-                    "redirect_uris": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
-                    "scopes": scopes.joined(separator: " "),
-                    "website": "https://hyperspace.marquiskurt.net"
-                ]
-            )
+            var client: Application? = nil
+
+            do {
+                //  We then do a POST request to create an application on the specified mastodon instance.
+                client = try await Chica.shared.request(.post, for: .apps, params:
+                    [
+                        "client_name": "Starlight",
+                        "redirect_uris": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
+                        "scopes": scopes.joined(separator: " "),
+                        "website": "https://hyperspace.marquiskurt.net"
+                    ]
+                )
+            } catch {
+                print(error)
+            }
 
             //  Once we register our application, we store the information we need for later (id and secret).
             keychain["starlight_client_id"] = client?.clientId
@@ -158,17 +164,23 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
             let keychain = Keychain(service: Chica.OAuth.keychainService)
 
-            //  We now have the user code, so now all we need to do is retrieve our token
-            let token: Token? = try! await Chica.shared.request(.post, for: .token, params:
-                [
-                    "client_id": keychain["starlight_client_id"]!,
-                    "client_secret": keychain["starlight_client_secret"]!,
-                    "redirect_uri": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
-                    "grant_type": "authorization_code",
-                    "code": code,
-                    "scope": scopes.joined(separator: " ")
-                ]
-            )
+            var token: Token? = nil
+
+            do {
+                //  We now have the user code, so now all we need to do is retrieve our token
+                token = try await Chica.shared.request(.post, for: .token, params:
+                    [
+                        "client_id": keychain["starlight_client_id"]!,
+                        "client_secret": keychain["starlight_client_secret"]!,
+                        "redirect_uri": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
+                        "grant_type": "authorization_code",
+                        "code": code,
+                        "scope": scopes.joined(separator: " ")
+                    ]
+                )
+            } catch {
+                print(error)
+            }
 
             //  We store the token in the keychain
             keychain["starlight_acess_token"] = token?.accessToken
@@ -293,23 +305,29 @@ public class Chica: ObservableObject, CustomStringConvertible {
         var content: T? = nil
 
         let url = Self.API_URL.appendingPathComponent(endpoint.path)
-        let (data, response) = try! await self.session.data(for: Self.makeRequest(method, url: url, params: params))
-
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw FetchError.message(
-                reason: "Request returned with error code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))",
-                data: data
-            )
-        }
-
         do {
 
-            content = try JSONDecoder().decode(T.self, from: data)
+            let (data, response) = try await self.session.data(for: Self.makeRequest(method, url: url, params: params))
+
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+                throw FetchError.message(
+                    reason: "Request returned with error code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))",
+                    data: data
+                )
+            }
+
+            do {
+
+                content = try JSONDecoder().decode(T.self, from: data)
+
+            } catch {
+
+                throw FetchError.parseError(reason: error)
+
+            }
 
         } catch {
-
-            throw FetchError.parseError(reason: error)
-
+            throw FetchError.unknownError(error: error)
         }
 
         return content
