@@ -20,14 +20,14 @@
 import Foundation
 import SwiftUI
 
-struct DeeplinkKey: EnvironmentKey {
+public struct DeeplinkKey: EnvironmentKey {
     static var defaultValue: Deeplinker.Deeplink? {
         return nil
     }
 }
 
 extension EnvironmentValues {
-    var deeplink: Deeplinker.Deeplink? {
+    public var deeplink: Deeplinker.Deeplink? {
         get {
             self[DeeplinkKey]
         }
