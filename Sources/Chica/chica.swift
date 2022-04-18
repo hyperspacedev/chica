@@ -11,7 +11,7 @@
 *   AND CONDITIONS OF THIS LICENSE.
 *
 *   This source file is part of the Codename Starlight open source project
-*   This file was created by Alejandro Modroño Vara on 14/7/21.
+*   Written by Alejandro Modroño <alex@sureservice.es>, July 2021
 *
 *   See `LICENSE.txt` for license information
 *   See `CONTRIBUTORS.txt` for project authors
@@ -21,14 +21,12 @@ import Foundation
 import KeychainAccess
 import SwiftUI
 import Combine
+import os
 
 /**
 The primary client object that handles all fediverse requests. It basically works as the logic controller of all the networking done by the app.
 
 All of the getter and setter methods work asynchronously thanks to the new concurrency model introduced in Swift 5.5. They have been written to provide helpful error messages and have a state that can be traced by the app. This model works best in scenarios where data needs to be loaded into a view.
-
-- Version 2.0
-
 */
 public class Chica: ObservableObject, CustomStringConvertible {
 
@@ -74,25 +72,47 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
         private let URL_SUFFIX = "oauth"
 
+        private let keychain: Keychain
+
         init() {
 
-            _ = isOnMainThread(named: "OAUTH CLIENT STARTED")
+            Chica.logger.trace("Initialising OAuth client.")
+            defer {
 
-//            //  First, we are trying to see if there is a Tokens.plist file that we will use for our application.
-//            if let path = Bundle.path(forResource: "Tokens", ofType: "plist", inDirectory: "Tokens"),
-//               let secrets = NSDictionary(contentsOfFile: path) as? [String: AnyObject] {
-//                self.secrets = secrets
-//            } else {
-//                self.secrets = nil
-//                print("Error: We no secrets were found which means that you won't be able to use Starlight.")
-//            }
+                if case .authenthicated = authState {
+                    Chica.logger.info("An access token was found, user is logged in.")
+                } else {
+                    Chica.logger.info("No access token was found, user is signed out.")
+                }
 
-            //  Now, we check whether the user is signed in or not.
-            let keychain = Keychain(service: Chica.OAuth.keychainService)
-            if let accessToken = keychain["starlight_acess_token"] {
-                authState = .authenthicated(authToken: accessToken)
+                Chica.logger.info("OAuth client initialised.")
+            }
+
+            Chica.logger.trace("Accessing keychainService \"\(Chica.OAuth.keychainService)\".")
+            keychain = Keychain(service: Chica.OAuth.keychainService)
+
+            /*
+             *  As of chica v1.0 users can also specify a specific authorization token
+             *  that will be used, by creating a Tokens.plist file.
+             */
+
+            //  First, we are trying to see if there is a Tokens.plist file that we
+            //  will use for our application.
+            if let path = Bundle.path(forResource: "Tokens", ofType: "plist", inDirectory: "Tokens"),
+               let secrets = NSDictionary(contentsOfFile: path) as? [String: String] {
+                if let token = secrets["token"] {
+                    authState = .authenthicated(authToken: token)
+                }
             } else {
-                authState = .signedOut
+
+                //  If there is no token, we will check whether the user is signed in
+                //  or not by checking if there is a token stored in the keychain.
+                if let accessToken = keychain["starlight_access_token"] {
+                    authState = .authenthicated(authToken: accessToken)
+                } else {
+                    authState = .signedOut
+                }
+
             }
 
         }
@@ -101,14 +121,15 @@ public class Chica: ObservableObject, CustomStringConvertible {
         /// - Parameter instanceDomain: The domain in which the instance lies to start authorization for.
         /// - Parameter authHandler: An optional closure that runs once the URL is created to open. Defaults to
         ///     nil, using `openURL` instead.
-        public func startOauthFlow(for instanceDomain: String, authHandler: ((URL) -> Void)? = nil) async {
+        public func startOauthFlow(for instanceDomain: String, authHandler: ((URL) -> Void)? = nil) async throws {
 
+            Chica.logger.trace("Sign Up process started...")
             //  First, we initialize the keychain object
-            let keychain = Keychain(service: Chica.OAuth.keychainService)
 
             //  Then, we assign the domain of the instance we are working with.
             keychain["starlight_instance_domain"] = instanceDomain
             Chica.INSTANCE_DOMAIN = instanceDomain
+            Chica.logger.trace("Instance domain: \(instanceDomain)")
 
             //  Now, we change the state of the oauth to .signInProgress
             authState = .signinInProgress
@@ -117,7 +138,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
             do {
                 //  We then do a POST request to create an application on the specified mastodon instance.
-                client = try await Chica.shared.request(.post, for: .apps, params:
+                client = try await Chica.shared.request(.post, for: .apps, queryParams:
                     [
                         "client_name": "Starlight",
                         "redirect_uris": "\(Chica.shared.urlPrefix)://\(URL_SUFFIX)",
@@ -126,12 +147,14 @@ public class Chica: ObservableObject, CustomStringConvertible {
                     ]
                 )
             } catch {
-                print(error)
+                Chica.logger.error("An unexpected error ocurred: \(error.localizedDescription)")
+                throw error
             }
 
             //  Once we register our application, we store the information we need for later (id and secret).
             keychain["starlight_client_id"] = client?.clientId
             keychain["starlight_client_secret"] = client?.clientSecret
+            Chica.logger.info("Application registered.")
 
             //  Then, we generate the url we need to visit for authorizing the user
             let url = Chica.API_URL.appendingPathComponent(Endpoint.authorizeUser.path)
@@ -142,33 +165,35 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
             //  And finally, we open the url in the browser.
             if let handler = authHandler {
+                Chica.logger.info("Opening url with custom handler.")
                 handler(url)
             } else {
+                Chica.logger.info("Opening url in the in-app safari.")
                 openURL(url)
             }
         }
 
         /// Continues with the OAuth flow after obtaining the user authorization code from the redirect URI
-        public func continueOauthFlow(_ url: URL) async {
+        public func continueOauthFlow(_ url: URL) async throws {
 
             if let code = url.queryParameters?.first(where: { $0.key == "code" }) {
 
-                await continueOauthFlow(code.value)
+                try await continueOauthFlow(code.value)
 
             }
 
         }
 
         /// Continues with the OAuth flow after obtaining the user authorization code from the redirect URI
-        public func continueOauthFlow(_ code: String) async {
+        public func continueOauthFlow(_ code: String) async throws {
 
-            let keychain = Keychain(service: Chica.OAuth.keychainService)
+            Chica.logger.trace("Continuing OAuth flow.")
 
             var token: Token? = nil
 
             do {
                 //  We now have the user code, so now all we need to do is retrieve our token
-                token = try await Chica.shared.request(.post, for: .token, params:
+                token = try await Chica.shared.request(.post, for: .token, queryParams:
                     [
                         "client_id": keychain["starlight_client_id"]!,
                         "client_secret": keychain["starlight_client_secret"]!,
@@ -179,7 +204,8 @@ public class Chica: ObservableObject, CustomStringConvertible {
                     ]
                 )
             } catch {
-                print(error)
+                Chica.logger.error("An unexpected error ocurred: \(error.localizedDescription)")
+                throw error
             }
 
             //  We store the token in the keychain
@@ -203,6 +229,12 @@ public class Chica: ObservableObject, CustomStringConvertible {
     /// A singleton everybody can access to.
     static public let shared = Chica()
 
+    /// The class' main logger.
+    public static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: Chica.self)
+    )
+
     //  MARK: – URLs
 
     /// The url prefix
@@ -220,57 +252,42 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     public var urlPrefix: String
 
-    private var oauthStateCancellable: AnyCancellable?
-
     //  MARK: - INITIALIZERS
 
     public init() {
 
-        _ = isOnMainThread(named: "CLIENT STARTED")
+        Chica.logger.trace("Initialising Chica...")
         urlPrefix = Chica.DEFAULT_URL_PREFIX
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
-
         self.decoder = decoder
-        var token: String? = nil
 
-        //  For the moment, we still need to use Combine and Publishers a bit, but this might change over time.
-        oauthStateCancellable = OAuth.shared.$authState.sink { state in
-
-            switch state {
-            case .authenthicated(let oToken):
-                token = oToken
-            default:
-                break
-            }
-
-        }
-
+        Chica.logger.trace("Initialising URL session configuration...")
         let configuration = URLSessionConfiguration.default
-        var headers = ["User-Agent": "Starlight:v1.0 (by Starlight Development Team)."]
-        if let token = token {
-            headers["Authorization"] = "Bearer \(token)"
-        }
-        configuration.httpAdditionalHeaders = headers
+        configuration.httpAdditionalHeaders = [
+            "User-Agent": "Starlight:v1.0 (by Starlight Development Team)."
+        ]
         configuration.urlCache = .shared
         configuration.requestCachePolicy = .reloadRevalidatingCacheData
         configuration.timeoutIntervalForRequest = 60
         configuration.timeoutIntervalForResource = 120
 
         self.session = URLSession(configuration: configuration)
-
+        Chica.logger.info("Initialised session, wapper successfully initialised.")
     }
 
-    /// Sets the URL prefix of the Chica client when making requests.
-    /// - Parameter urlPrefix: The URL prefix to use with this client.
-    ///
-    /// When the Chica class is first instantiated, the default URL prefix used is `starlight://`. When this method is
-    /// called, any future requests made with ``request(_:for:params:)`` will use the new URL prefix.
-    ///
-    /// - Important: The URL prefix that is assigned to Chica should be a valid URL prefix type registered with your
-    ///     app in Xcode or in the app's Info.plist.
+    /**
+     *  Sets the URL prefix of the Chica client when making requests.
+     *  - Parameter urlPrefix: The URL prefix to use with this client.
+     *
+     *  When the Chica class is first instantiated, the default URL prefix used is `starlight://`. When this method is called, any future requests made with
+     *  ``request(_:for:params:)`` will use the new URL prefix.
+     *
+     *  - Important: The URL prefix that is assigned to Chica should be a valid URL prefix type registered with your app in Xcode or in the app's Info.plist.
+     */
     public func setRequestPrefix(to urlPrefix: String) {
+        Chica.logger.info("URL prefix changed from \(self.urlPrefix) to \(urlPrefix).")
         self.urlPrefix = urlPrefix
     }
 
@@ -278,11 +295,18 @@ public class Chica: ObservableObject, CustomStringConvertible {
     ///
     /// When calling this method, future requests will use the default URL prefix of `starlight://`.
     public func resetRequestPrefix() {
+        Chica.logger.info("Restored default url prefix: URL prefix changed from \(self.urlPrefix) to \(Chica.DEFAULT_URL_PREFIX).")
         self.urlPrefix = Chica.DEFAULT_URL_PREFIX
     }
 
     /// Returns a URLRequest with the specified URL, http method, and query parameters.
-    static private func makeRequest(_ method: Method, url: URL, params: [String: String]? = nil) -> URLRequest {
+    static private func makeRequest(
+        _ method: Method,
+        url: URL,
+        params: [String: String]? = nil,
+        body: [String: String]? = nil,
+        headers: [String: String]? = nil
+    ) -> URLRequest {
 
         var request: URLRequest
         var url = url
@@ -294,41 +318,72 @@ public class Chica: ObservableObject, CustomStringConvertible {
         }
 
         request = URLRequest(url: url)
-        request.httpMethod = method.rawValue
+
+        request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+
+        if let body = body {
+
+            assert(method == .post, "A GET request can't have body arguments.")
+
+            var bodyItems: String = ""
+
+            for (index, value) in body.enumerated() {
+                bodyItems.append(contentsOf: "\(value.key)=\(value.value)\(index == body.count - 1 ? "" : "&")")
+            }
+
+            request.httpBody = bodyItems.data(using: String.Encoding.utf8);
+            request.httpMethod = method.rawValue
+        }
+
+        if let headers = headers {
+            for (_, value) in headers.enumerated() {
+                request.addValue(value.value, forHTTPHeaderField: value.key)
+            }
+        }
+
+        if case .authenthicated(let token) = Chica.OAuth.shared.authState {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            Chica.logger.info("Added authorization token \"\(token)\" to URL session configuration headers.")
+        }
 
         return request
 
     }
 
-    public func request<T: Decodable>(_ method: Method, for endpoint: Endpoint, params: [String: String]? = nil) async throws -> T? {
+    public func request<T: Decodable>(
+        _ method: Method,
+        for endpoint: Endpoint,
+        queryParams: [String: String]? = nil,
+        body: [String: String]? = nil,
+        headers: [String: String]? = nil
+    ) async throws -> T? {
 
-        var content: T? = nil
-
+        var content: T?
         let url = Self.API_URL.appendingPathComponent(endpoint.path)
-        do {
 
-            let (data, response) = try await self.session.data(for: Self.makeRequest(method, url: url, params: params))
-
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-                throw FetchError.message(
-                    reason: "Request returned with error code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))",
-                    data: data
-                )
-            }
-
-            do {
-
-                content = try JSONDecoder().decode(T.self, from: data)
-
-            } catch {
-
-                throw FetchError.parseError(reason: error)
-
-            }
-
-        } catch {
-            throw FetchError.unknownError(error: error)
+        defer {
+            Chica.logger.info("\(method.rawValue) request to endpoint \"\(url)\" finished.")
         }
+
+        let (data, response) = try await self.session.data(
+            for: Self.makeRequest(
+                method,
+                url: url,
+                params: queryParams,
+                body: body,
+                headers: headers
+            )
+        )
+
+        Chica.logger.trace("Received data: \(String(bytes: data, encoding: .utf8)! as NSObject)")
+
+        content = try JSONDecoder().decode(
+            T.self,
+            from: FetchError.processResponse(
+                data: data,
+                response: response
+            )
+        )
 
         return content
 

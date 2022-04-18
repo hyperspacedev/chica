@@ -4,7 +4,6 @@
 //
 //  Created by Alex Modroño Vara on 18/7/21.
 //
-
 import Foundation
 
 /// Represents an error that might be returned when doing a HTTP request.
@@ -14,9 +13,10 @@ public enum FetchError: Error {
 
     case unknown(data: Data)
     case unknownError(error: Error)
+    case serverError(statusCode: Int, data: Data)
+    case clientError(statusCode: Int, data: Data)
     case message(reason: String, data: Data)
     case parseError(reason: Error)
-    case mastodonAPIError(error: MastodonError, data: Data)
     
     static private let decoder = JSONDecoder()
     
@@ -39,17 +39,22 @@ public enum FetchError: Error {
 
         } else {
 
-            do {
+            var error: FetchError
 
-                let mastodonError = try decoder.decode(MastodonError.self, from: data)
-
-                throw FetchError.mastodonAPIError(error: mastodonError, data: data)
-
-            } catch _ {
-
-                throw FetchError.unknown(data: data)
-
+            defer {
+                Chica.logger.error("An error ocurred: \(error)")
             }
+
+            if 500 ... 599 ~= httpResponse.statusCode {
+                error = FetchError.serverError(statusCode: httpResponse.statusCode, data: data)
+            } else if 400 ... 499 ~= httpResponse.statusCode {
+                error = FetchError.clientError(statusCode: httpResponse.statusCode, data: data)
+            } else {
+                error = FetchError.unknown(data: data)
+            }
+
+            throw error
+
         }
     }
 }
@@ -58,9 +63,13 @@ extension FetchError: CustomStringConvertible {
     public var description: String {
         switch self {
         case .unknownError(let error):
-            return "\(error)"
+            return "An unknown error ocurred: \(error)."
+        case .serverError(let statusCode, let data):
+            return "A server-side error with code \(statusCode) ocurred: \(String(bytes: data, encoding: .utf8) ?? "")."
+        case .clientError(let statusCode, let data):
+            return "A client-side error with code \(statusCode) ocurred: \(String(bytes: data, encoding: .utf8) ?? "")."
         default:
-            return "Use \"FetchError.processResponse()\" to get more information."
+            return "An error ocurred."
         }
     }
 }

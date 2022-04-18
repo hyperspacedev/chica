@@ -18,17 +18,8 @@ final class chicaTests: XCTestCase {
 
     func testOauth() async throws {
 
-        await Chica.OAuth.shared.startOauthFlow(for: "mastodon.online")
+        try await Chica.OAuth.shared.startOauthFlow(for: "mastodon.online")
 
-    }
-
-    func doWhatever(_ parameters: [String : String]?) {
-        print("RECEIVED DEEP LINK...")
-        if let parameters = parameters {
-            for parameter in parameters {
-                print("\(parameter.key) : \(parameter.value)")
-            }
-        }
     }
 
     func testBasicRequests() async throws {

@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Deeplinker",
+        "repositoryURL": "https://github.com/iAlex11/Deeplinker",
+        "state": {
+          "branch": "main",
+          "revision": "4b7338c3320bdd09c92c650cc777901bfb4982e7",
+          "version": null
+        }
+      },
+      {
         "package": "KeychainAccess",
         "repositoryURL": "https://github.com/kishikawakatsumi/KeychainAccess",
         "state": {
