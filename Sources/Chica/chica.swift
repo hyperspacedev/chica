@@ -209,11 +209,21 @@ public class Chica: ObservableObject, CustomStringConvertible {
             }
 
             //  We store the token in the keychain
-            keychain["starlight_acess_token"] = token?.accessToken
+            keychain["starlight_access_token"] = token?.accessToken
 
             //  And, finally, we change the state to use the token we just retrieved.
             self.authState = .authenthicated(authToken: token!.accessToken)
 
+        }
+
+        public func logOut() {
+            if self.authState != .signedOut {
+                self.authState = .signedOut
+                keychain["starlight_access_token"] = nil
+                Chica.logger.info("Logged out user.")
+            } else {
+                Chica.logger.info("Could not log out because the user is not logged in.")
+            }
         }
 
     }
@@ -320,6 +330,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
         request = URLRequest(url: url)
 
         request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = method.rawValue
 
         if let body = body {
 
@@ -332,7 +343,6 @@ public class Chica: ObservableObject, CustomStringConvertible {
             }
 
             request.httpBody = bodyItems.data(using: String.Encoding.utf8);
-            request.httpMethod = method.rawValue
         }
 
         if let headers = headers {
@@ -350,7 +360,7 @@ public class Chica: ObservableObject, CustomStringConvertible {
 
     }
 
-    public func request<T: Decodable>(
+    @discardableResult public func request<T: Decodable>(
         _ method: Method,
         for endpoint: Endpoint,
         queryParams: [String: String]? = nil,
