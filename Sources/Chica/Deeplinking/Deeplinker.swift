@@ -70,7 +70,7 @@ public class Deeplinker {
             case .profile:
                 return 1
             case .signUp:
-                return 0
+                return nil
             }
         }
         

@@ -45,9 +45,9 @@ extension DeeplinkError: CustomStringConvertible {
     public var description: String {
         switch self {
         case .unknownScheme(let received):
-            return "The received scheme (\"\(received)\") does not match with the one specified."
+            return "The received scheme (\"\(received ?? "")\") does not match with the one specified."
         case .unknownDeeplink(let received):
-            return "The received link \(received != nil ? "(\"\(received)\")" : "") does not match with any of the ones defined in the Deeplink enum."
+            return "The received link \(received != nil ? "(\"\(received ?? "")\")" : "") does not match with any of the ones defined in the Deeplink enum."
         case .expectedQueryParameters(let count, let received):
             return "The received link should have \(count) query parameters, but \(count > received ? "only" : "") \(received) \(received == 1 ? "was" : "were") received."
         case .unknownQueryParameter(let expecting):
